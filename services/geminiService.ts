@@ -1,15 +1,13 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { getSystemInstruction } from '../constants';
-import { Business, BusinessGenome, MatchResult } from "../types";
+import { Business, BusinessGenome, MatchResult, MarketingSuite } from "../types";
 
-// Initialize Gemini Client
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// ... (Keep existing generateBusinessAdvice)
 export const generateBusinessAdvice = async (query: string, chatHistory: string[], language: string = 'ar'): Promise<string> => {
   try {
-    const model = 'gemini-2.5-flash';
+    const model = 'gemini-3-flash-preview';
     
     let prompt = '';
     if (language === 'ar') {
@@ -57,25 +55,47 @@ export const generateBusinessAdvice = async (query: string, chatHistory: string[
   }
 };
 
-// ... (Keep existing generateMarketingPitch)
-export const generateMarketingPitch = async (businessName: string, category: string, language: string = 'ar'): Promise<string> => {
+export const generateMarketingSuite = async (businessName: string, description: string, language: string = 'ar'): Promise<MarketingSuite> => {
   try {
-    let prompt = '';
-    if (language === 'ar') {
-      prompt = `اكتب وصفاً تسويقياً قصيراً وجذاباً (تغريدة واحدة) لشركة اسمها "${businessName}" تعمل في مجال "${category}".`;
-    } else if (language === 'es') {
-      prompt = `Escribe una descripción de marketing corta y atractiva (un tweet) para una empresa llamada "${businessName}" en la categoría "${category}".`;
-    } else {
-      prompt = `Write a short and catchy marketing pitch (one tweet) for a company named "${businessName}" in the "${category}" industry.`;
-    }
+    const prompt = `
+      Generate a professional marketing suite for the company: "${businessName}".
+      Company Description: "${description}"
+      Language: ${language === 'ar' ? 'Arabic' : language === 'es' ? 'Spanish' : 'English'}
+
+      The suite must include:
+      1. A short catchy pitch (one tweet length).
+      2. A memorable slogan (3-5 words).
+      3. A professional LinkedIn post structure.
+      4. A brief description of the primary target audience.
+    `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            pitch: { type: Type.STRING },
+            slogan: { type: Type.STRING },
+            linkedinPost: { type: Type.STRING },
+            targetAudience: { type: Type.STRING }
+          },
+          required: ["pitch", "slogan", "linkedinPost", "targetAudience"]
+        }
+      }
     });
-    return response.text || "";
+
+    return JSON.parse(response.text || "{}") as MarketingSuite;
   } catch (error) {
-    return "Leading company in its field.";
+    console.error("AI Marketing Error:", error);
+    return {
+      pitch: "Leading innovation in our field.",
+      slogan: "Excellence in every step.",
+      linkedinPost: "Thrilled to share our latest updates as we continue to push boundaries.",
+      targetAudience: "Business professionals and startups."
+    };
   }
 };
 
@@ -87,7 +107,6 @@ export interface AISearchResponse {
   };
 }
 
-// ... (Keep existing searchBusinessesWithAI)
 export const searchBusinessesWithAI = async (query: string, businesses: Business[], language: string = 'ar'): Promise<AISearchResponse> => {
   try {
     const simplifiedData = businesses.map(b => ({
@@ -111,7 +130,7 @@ export const searchBusinessesWithAI = async (query: string, businesses: Business
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: 'application/json'
@@ -135,7 +154,6 @@ export const searchBusinessesWithAI = async (query: string, businesses: Business
   }
 };
 
-// --- NEW: Business Genome Matching ---
 export const generateBusinessMatches = async (myProfile: BusinessGenome, availableBusinesses: Business[], language: string = 'ar'): Promise<MatchResult[]> => {
   try {
     const simplifiedCandidates = availableBusinesses
@@ -168,33 +186,17 @@ export const generateBusinessMatches = async (myProfile: BusinessGenome, availab
       
       - "analysisPoints" must be an array of exactly 3 objects describing the match in detail:
          1. factor: "Industry Sector"
-            description: Compare specific sectors. E.g. "Your '${myProfile.industrySector || 'Sector'}' aligns with their 'Real Estate'."
+            description: Compare specific sectors.
          2. factor: "Services Synergy"
-            description: Identify specific overlaps between needs and offers. E.g. "Your need for '${myProfile.servicesNeeded?.[0] || 'Services'}' is met by their offer."
+            description: Identify specific overlaps between needs and offers.
          3. factor: "Strategic Fit"
-            description: Compare company size and markets. E.g. "Both target '${myProfile.targetMarkets?.[0] || 'Market'}' and are '${myProfile.companySize}' size."
+            description: Compare company size and markets.
       
       Output Language: ${language === 'ar' ? 'Arabic' : language === 'es' ? 'Spanish' : 'English'}
-
-      Output format (JSON only):
-      [
-        {
-          "companyId": "id",
-          "score": 85,
-          "matchReason": "...",
-          "sharedInterests": ["Tag1", "Tag2"],
-          "collaborationOpportunity": "...",
-          "analysisPoints": [
-             { "factor": "Industry Sector", "description": "..." },
-             { "factor": "Services Synergy", "description": "..." },
-             { "factor": "Strategic Fit", "description": "..." }
-          ]
-        }
-      ]
     `;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-pro-preview',
       contents: prompt,
       config: {
         responseMimeType: 'application/json'
@@ -202,7 +204,6 @@ export const generateBusinessMatches = async (myProfile: BusinessGenome, availab
     });
 
     const text = response.text || "[]";
-    // Robust JSON extraction
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     const cleanText = jsonMatch ? jsonMatch[0] : text.replace(/```json/g, '').replace(/```/g, '').trim();
     

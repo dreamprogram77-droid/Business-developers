@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import GrowthTrends from './GrowthTrends';
 
 interface HomeDashboardProps {
   onNavigate: (tab: 'map' | 'services') => void;
@@ -26,7 +27,7 @@ const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-8 animate-fade-in pb-10">
       {/* Hero Section */}
-      <div className="relative rounded-3xl overflow-hidden p-8 md:p-12 bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-800 dark:to-indigo-900 text-white shadow-2xl">
+      <div className="relative rounded-3xl overflow-hidden p-8 md:p-12 bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-2xl">
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(white 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
         
@@ -73,48 +74,51 @@ const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
       {/* KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <div key={stat.id} className="glass-panel p-6 rounded-2xl hover:translate-y-[-5px] transition-transform duration-300">
+          <div key={stat.id} className="glass-panel p-6 rounded-2xl hover:translate-y-[-5px] transition-transform duration-300 shadow-card bg-white">
             <div className="flex items-start justify-between mb-4">
-              <div className="p-3 bg-blue-50 dark:bg-slate-700 rounded-xl text-2xl">
+              <div className="p-3 bg-blue-50 rounded-xl text-2xl">
                 {stat.icon}
               </div>
               {stat.status === 'success' && <span className="w-2 h-2 rounded-full bg-green-500"></span>}
               {stat.status === 'warning' && <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>}
               {stat.status === 'neutral' && <span className="w-2 h-2 rounded-full bg-slate-400"></span>}
             </div>
-            <h3 className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{stat.title}</h3>
-            <div className="text-2xl font-bold text-slate-800 dark:text-white">{stat.value}</div>
+            <h3 className="text-slate-500 text-sm font-medium mb-1">{stat.title}</h3>
+            <div className="text-2xl font-bold text-slate-800">{stat.value}</div>
           </div>
         ))}
       </div>
 
+      {/* Analytics Section - Real Visualizations */}
+      <GrowthTrends />
+
       {/* Split View: Activity & Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Activity Feed */}
-        <div className="lg:col-span-2 glass-panel rounded-3xl p-8 flex flex-col">
+        <div className="lg:col-span-2 glass-panel rounded-3xl p-8 flex flex-col bg-white border border-slate-100 shadow-card">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+            <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2">
               <span className="text-blue-500">●</span> {t('recentActivity')}
             </h3>
-            <button className="text-sm text-blue-500 hover:underline">{t('viewAll')}</button>
+            <button className="text-sm text-blue-500 hover:underline font-bold uppercase tracking-widest">{t('viewAll')}</button>
           </div>
           
           <div className="space-y-6">
             {activities.map((activity) => (
               <div key={activity.id} className="flex gap-4 group">
                 <div className="relative flex flex-col items-center">
-                   <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10 border-2 border-white dark:border-slate-800 
-                     ${activity.type === 'user' ? 'bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300' : 
-                       activity.type === 'system' ? 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300' : 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300'}`}>
+                   <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 z-10 border-2 border-white
+                     ${activity.type === 'user' ? 'bg-purple-100 text-purple-600' : 
+                       activity.type === 'system' ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
                      {activity.type === 'user' ? '👤' : activity.type === 'system' ? '🛡️' : '📩'}
                    </div>
                    {activity.id !== activities.length && (
-                     <div className="w-0.5 h-full bg-slate-200 dark:bg-slate-700 absolute top-10 -bottom-6"></div>
+                     <div className="w-0.5 h-full bg-slate-100 absolute top-10 -bottom-6"></div>
                    )}
                 </div>
-                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl flex-1 border border-slate-100 dark:border-slate-700 group-hover:border-blue-200 dark:group-hover:border-blue-900 transition-colors">
-                  <p className="text-slate-800 dark:text-slate-200 font-medium">{activity.text}</p>
-                  <span className="text-xs text-slate-400 mt-2 block">{activity.time}</span>
+                <div className="bg-slate-50 p-4 rounded-2xl flex-1 border border-slate-100 group-hover:border-blue-200 transition-colors">
+                  <p className="text-slate-800 font-bold text-sm">{activity.text}</p>
+                  <span className="text-[10px] text-slate-400 mt-2 block font-bold uppercase tracking-widest">{activity.time} ago</span>
                 </div>
               </div>
             ))}
@@ -122,42 +126,42 @@ const HomeDashboard: React.FC<HomeDashboardProps> = ({ onNavigate }) => {
         </div>
 
         {/* Quick Actions */}
-        <div className="glass-panel rounded-3xl p-8 bg-gradient-to-b from-white to-slate-50 dark:from-slate-800 dark:to-slate-900">
-           <h3 className="text-xl font-bold mb-6 text-slate-800 dark:text-white">{t('quickActions')}</h3>
+        <div className="glass-panel rounded-3xl p-8 bg-white border border-slate-100 shadow-card">
+           <h3 className="text-xl font-bold mb-6 text-slate-800">{t('quickActions')}</h3>
            <div className="grid grid-cols-1 gap-3">
               <button 
                 onClick={() => onNavigate('services')} 
-                className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all group"
+                className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-400 transition-all group"
               >
-                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform">
+                <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
                   ⚡
                 </div>
                 <div className="text-start">
-                  <span className="block font-bold text-slate-800 dark:text-white">{t('createProject')}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Start a new venture</span>
+                  <span className="block font-bold text-brand-primary text-sm">{t('createProject')}</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">Start a new venture</span>
                 </div>
               </button>
 
               <button 
                 onClick={() => onNavigate('services')}
-                className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all group"
+                className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-400 transition-all group"
               >
-                <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
                   🤖
                 </div>
                 <div className="text-start">
-                  <span className="block font-bold text-slate-800 dark:text-white">{t('consultant')}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Ask AI Advisor</span>
+                  <span className="block font-bold text-brand-primary text-sm">{t('consultant')}</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">Ask AI Advisor</span>
                 </div>
               </button>
 
-              <button className="flex items-center gap-4 p-4 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm hover:shadow-md hover:border-blue-400 dark:hover:border-blue-500 transition-all group">
-                <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform">
+              <button className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 shadow-sm hover:shadow-md hover:border-blue-400 transition-all group">
+                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform">
                   🎧
                 </div>
                 <div className="text-start">
-                  <span className="block font-bold text-slate-800 dark:text-white">{t('contactSupport')}</span>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">24/7 Help Center</span>
+                  <span className="block font-bold text-brand-primary text-sm">{t('contactSupport')}</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase">24/7 Help Center</span>
                 </div>
               </button>
            </div>

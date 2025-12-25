@@ -7,7 +7,8 @@ export enum ServiceType {
   VIRTUAL_LAB = 'VIRTUAL_LAB',
   NETWORKING = 'NETWORKING',
   TASK_MANAGER = 'TASK_MANAGER',
-  NETWORK_INTELLIGENCE = 'NETWORK_INTELLIGENCE' // New Service
+  NETWORK_INTELLIGENCE = 'NETWORK_INTELLIGENCE',
+  MARKETING_STUDIO = 'MARKETING_STUDIO'
 }
 
 export interface BusinessGenome {
@@ -23,19 +24,26 @@ export interface Business {
   id: string;
   name: string;
   description: string;
-  category: string; // Now uses keys like 'TECHNOLOGY', 'AVAILABLE'
+  category: string;
   logoUrl: string;
   color: string;
   isOccupied: boolean;
-  gridPosition: { x: number; y: number }; // Simplified grid coordinates
+  gridPosition: { x: number; y: number };
   activeVisitors?: number;
   services?: string[];
-  genomeProfile?: BusinessGenome; // Added Genome Profile
+  genomeProfile?: BusinessGenome;
   contact?: {
     email?: string;
     phone?: string;
     website?: string;
   };
+}
+
+export interface MarketingSuite {
+  pitch: string;
+  slogan: string;
+  linkedinPost: string;
+  targetAudience: string;
 }
 
 export interface MatchAnalysisPoint {
@@ -45,11 +53,11 @@ export interface MatchAnalysisPoint {
 
 export interface MatchResult {
   companyId: string;
-  score: number; // 0-100
+  score: number;
   matchReason: string;
   sharedInterests: string[];
   collaborationOpportunity: string;
-  analysisPoints?: MatchAnalysisPoint[]; // Detailed data points
+  analysisPoints?: MatchAnalysisPoint[];
 }
 
 export interface ChatMessage {
